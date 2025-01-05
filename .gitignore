@@ -1,0 +1,10 @@
+.gradle
+build
+out
+.vscode
+.idea
+**.iml
+swagger
+bin
+tmp
+target
