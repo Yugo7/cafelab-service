@@ -22,16 +22,19 @@ class ProductController(private val productService: ProductService) {
         productService.getProductById(id).map { existingProduct ->
             val updatedProduct: Product = existingProduct
                 .copy(
-                    name = newProduct.name,
-                    description = newProduct.description,
-                    brand = newProduct.brand,
-                    countryOfOrigin = newProduct.countryOfOrigin,
-                    weight = newProduct.weight,
-                    price = newProduct.price,
-                    cost = newProduct.cost,
-                    available = newProduct.available,
-                    leastQuantityInStock = newProduct.leastQuantityInStock,
-                    firstDateAvailable = newProduct.firstDateAvailable
+                    nomePt = newProduct.nomePt,
+                    descricaoPt = newProduct.descricaoPt,
+                    origem = newProduct.origem,
+                    grao = newProduct.grao,
+                    preco = newProduct.preco,
+                    imagem = newProduct.imagem,
+                    secao = newProduct.secao,
+                    descricaoEn = newProduct.descricaoEn,
+                    nomeEn = newProduct.nomeEn,
+                    priceId = newProduct.priceId,
+                    sizePt = newProduct.sizePt,
+                    sizeEn = newProduct.sizeEn,
+                    isActive = newProduct.isActive
                 )
             productService.updateProduct(existingProduct.id, updatedProduct)
         }

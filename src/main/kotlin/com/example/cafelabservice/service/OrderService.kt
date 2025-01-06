@@ -17,12 +17,11 @@ class OrderService(private val orderRepository: OrderRepository) {
         orderRepository.findById(id).map { existingOrder ->
             val updatedOrder: Order = existingOrder
                 .copy(
-                    orderPlacedTimestamp = newOrder.orderPlacedTimestamp,
-                    orderPaidTimestamp = newOrder.orderPaidTimestamp,
-                    status = newOrder.status,
                     products = newOrder.products,
-                    totalPaid = newOrder.totalPaid,
-                    isSubscription = newOrder.isSubscription
+                    receiptUrl = newOrder.receiptUrl,
+                    total = newOrder.total,
+                    status = newOrder.status,
+                    createdAt = newOrder.createdAt
                 )
             orderRepository.save(updatedOrder)
         }

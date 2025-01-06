@@ -29,12 +29,8 @@ class OrderController(private val orderService: OrderService) {
         orderService.getOrderById(id).map { existingOrder ->
             val updatedOrder: Order = existingOrder
                 .copy(
-                    orderPlacedTimestamp = newOrder.orderPlacedTimestamp,
-                    orderPaidTimestamp = newOrder.orderPaidTimestamp,
                     status = newOrder.status,
-                    products = newOrder.products,
-                    totalPaid = newOrder.totalPaid,
-                    isSubscription = newOrder.isSubscription
+                    products = newOrder.products
                 )
             orderService.updateOrder(existingOrder.id, updatedOrder)
         }

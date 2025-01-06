@@ -21,7 +21,7 @@ class EventsService(private val eventRepository: EventsRepository) {
                 .copy(
                     name = newEvent.name,
                     description = newEvent.description,
-                    location = newEvent.location,
+                    local = newEvent.local,
                     date = newEvent.date
                 )
             eventRepository.save(updatedEvent)

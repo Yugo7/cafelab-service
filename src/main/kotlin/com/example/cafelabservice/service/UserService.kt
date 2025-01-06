@@ -17,9 +17,6 @@ class UserService(private val userRepository: UserRepository) {
         userRepository.findById(id).map { existingUser ->
             val updatedUser: User = existingUser
                 .copy(
-                    firstName = newUser.firstName,
-                    middleNames = newUser.middleNames,
-                    lastName = newUser.lastName,
                     email = newUser.email,
                     address = newUser.address
                 )

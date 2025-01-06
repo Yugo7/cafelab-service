@@ -29,11 +29,10 @@ class UserController(private val userService: UserService) {
         userService.getUserById(id).map { existingUser ->
             val updatedUser: User = existingUser
                 .copy(
-                    firstName = newUser.firstName,
-                    middleNames = newUser.middleNames,
-                    lastName = newUser.lastName,
+                    name = newUser.name,
                     email = newUser.email,
-                    address = newUser.address
+                    password = newUser.password,
+                    role = newUser.role
                 )
             userService.updateUser(existingUser.id, updatedUser)
         }

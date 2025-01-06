@@ -1,21 +1,27 @@
 package com.example.cafelabservice.entity
 
-import jakarta.persistence.Entity
-import jakarta.persistence.Id
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Table
+import jakarta.persistence.*
+import java.time.LocalDate
+import java.time.ZonedDateTime
 
 @Entity
-@Table(name = "users")
+@Table(name = "\"user\"")
 data class User(
-    @Id @GeneratedValue(strategy = GenerationType.AUTO)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0,
-    val username: String = "",
-    val firstName: String = "",
-    val middleNames: String? = "",
-    val lastName: String = "",
-    val email: String = "",
-    val address: String = "",
-    val password: String = ""
+    val createdAt: ZonedDateTime = ZonedDateTime.now(),
+    val name: String? = null,
+    val email: String,
+    val birthday: LocalDate? = null,
+    @Column(columnDefinition = "jsonb")
+    val address: String? = null,
+    val nif: String? = null,
+    val username: String? = null,
+    val password: String? = null,
+    @Column(columnDefinition = "jsonb")
+    val role: String? = null,
+    val stripeId: String? = null,
+    @Column(columnDefinition = "jsonb")
+    val guestStripeIds: String? = null,
+    val isGuest: Boolean = false
 )

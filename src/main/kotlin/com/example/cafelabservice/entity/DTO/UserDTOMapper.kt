@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component
 class UserDTOMapper : Converter<User, UserDTO> {
     override fun convert(user: User) = UserDTO(
         id = user.id,
-        username = user.username,
+        username = user.username ?: "",
         email = user.email,
-        password = user.password
+        password = user.password ?: "",
     )
 }
