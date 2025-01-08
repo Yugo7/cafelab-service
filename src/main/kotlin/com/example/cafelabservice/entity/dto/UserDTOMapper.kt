@@ -1,4 +1,4 @@
-package com.example.cafelabservice.entity.DTO
+package com.example.cafelabservice.entity.dto
 
 import com.example.cafelabservice.entity.User
 import org.springframework.core.convert.converter.Converter

@@ -14,10 +14,7 @@ data class Event(
     val description: String? = null,
     val local: String? = null,
     val date: LocalDate? = null,
-    @Column(name = "imageFinish")
     val imageFinish: String? = null,
-    @Column(name = "imagePromotion")
     val imagePromotion: String? = null,
-    @Column(name = "instagramUrl")
     val instagramUrl: String? = null
 )

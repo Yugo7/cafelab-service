@@ -1,4 +1,4 @@
-package com.example.cafelabservice.entity.DTO
+package com.example.cafelabservice.entity.dto
 
 data class UserDTO(
     val id: Long,
