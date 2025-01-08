@@ -1,9 +1,6 @@
-# Use an official OpenJDK runtime as a parent image
+# syntax = docker/dockerfile:1.2
 FROM gradle:jdk18 AS build
-RUN echo "MAIL_HOST=$MAIL_HOST"
-RUN echo "MAIL_PORT=$MAIL_PORT"
-RUN echo "MAIL_USERNAME=$MAIL_USERNAME"
-RUN echo "MAIL_PASSWORD=$MAIL_PASSWORD"
+RUN --mount=type=secret,id=_env,dst=/etc/secrets/.env cat /etc/secrets/.env
 WORKDIR /app
 COPY . .
 RUN chmod +x gradlew
