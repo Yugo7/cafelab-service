@@ -3,7 +3,7 @@ FROM gradle:jdk18 AS build
 
 # Mount the .env file as a secret
 RUN --mount=type=secret,id=_env,dst=/etc/secrets/.env cat /etc/secrets/.env
-
+RUN --env-file /etc/secrets/.env build
 WORKDIR /app
 COPY . .
 RUN chmod +x gradlew
