@@ -12,6 +12,9 @@ RUN chmod +x gradlew
 RUN --mount=type=secret,id=_env,dst=/etc/secrets/.env \
     set -o allexport; . /etc/secrets/.env; set +o allexport
 
+# Print environment variables to verify they are set correctly
+RUN env
+
 # Use the environment variables during the build
 RUN ./gradlew clean build
 RUN ls -l build/libs
