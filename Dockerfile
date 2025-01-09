@@ -6,7 +6,7 @@ COPY . .
 RUN chmod +x gradlew
 
 # Source the .env file and export the variables
-RUN set -o allexport; source /etc/secrets/.env; set +o allexport
+RUN set -o allexport; . /etc/secrets/.env; set +o allexport
 
 # Use the environment variables during the build
 RUN ./gradlew clean build
@@ -19,7 +19,7 @@ WORKDIR /app
 COPY --from=build /etc/secrets/.env /app/.env
 
 # Source the .env file and export the variables
-RUN set -o allexport; source /app/.env; set +o allexport
+RUN set -o allexport; . /app/.env; set +o allexport
 
 # Display the values of the environment variables
 RUN echo "BD_URL=$BD_URL"
