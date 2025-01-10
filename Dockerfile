@@ -6,6 +6,9 @@ RUN --mount=type=secret,id=_env,dst=/etc/secrets/.env cat /etc/secrets/.env || t
 
 WORKDIR /app
 COPY . .
+
+RUN chmod +x gradlew
+
 # Run the gradlew build command
 RUN --mount=type=secret,id=_env,dst=/etc/secrets/.env ./gradlew clean build
 
