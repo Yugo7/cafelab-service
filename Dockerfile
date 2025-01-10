@@ -10,7 +10,7 @@ RUN chmod +x gradlew
 
 # Create a shell script to source the .env file and run the Gradle build
 RUN --mount=type=secret,id=_env,dst=/etc/secrets/.env \
-    echo 'set -o allexport; . /etc/secrets/.env; set +o allexport; ./gradlew clean build' > build.sh && \
+    echo 'export $(grep -v '^#' /etc/secrets/.env | xargs) && ./gradlew clean build' > build.sh && \
     chmod +x build.sh
 
 # Run the shell script with the secret mounted
