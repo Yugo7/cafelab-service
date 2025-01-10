@@ -1,8 +1,5 @@
 # syntax = docker/dockerfile:1.2
 
-# Check if the TEST environment variable is set
-RUN if [ -z "${TEST}" ]; then echo "TEST is not set"; else echo "TEST is set to ${TEST}"; fi
-
 FROM gradle:jdk18 AS build
 RUN if [ -z "${TEST}" ]; then echo "2TEST is not set"; else echo "2TEST is set to ${TEST}"; fi
 
