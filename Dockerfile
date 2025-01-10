@@ -9,8 +9,11 @@ COPY . .
 
 RUN chmod +x gradlew
 
-# Run the gradlew build command
-RUN --mount=type=secret,id=_env,dst=/etc/secrets/.env ./gradlew clean build
+# Create a script to load environment variables and run gradlew
+RUN echo '#!/bin/sh\n. /etc/secrets/.env\n./gradlew clean build' > run_gradlew.sh && chmod +x run_gradlew.sh
+
+# Run the script
+RUN --mount=type=secret,id=_env,dst=/etc/secrets/.env ./run_gradlew.sh
 
 RUN ls -l build/libs
 
