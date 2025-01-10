@@ -2,7 +2,7 @@
 FROM gradle:jdk18 AS build
 
 # Mount the .env file as a secret
-RUN --mount=type=secret,id=_env,dst=/etc/secrets/.env cat /etc/secrets/.env
+RUN --mount=type=secret,id=_env,dst=/etc/secrets/.env cat /etc/secrets/.env || true
 
 WORKDIR /app
 COPY . .
@@ -13,8 +13,8 @@ RUN --mount=type=secret,id=_env,dst=/etc/secrets/.env \
     echo 'set -o allexport; . /etc/secrets/.env; set +o allexport; ./gradlew clean build' > build.sh && \
     chmod +x build.sh
 
-# Run the shell script
-RUN ./build.sh
+# Run the shell script with the secret mounted
+RUN --mount=type=secret,id=_env,dst=/etc/secrets/.env ./build.sh
 RUN ls -l build/libs
 
 FROM openjdk:24-slim-bullseye
