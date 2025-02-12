@@ -1,7 +1,11 @@
 package com.example.cafelabservice.controllers
 
 import com.example.cafelabservice.entity.Product
+import com.example.cafelabservice.models.dto.ProductViewDTO
 import com.example.cafelabservice.service.ProductService
+import com.example.cafelabservice.utils.converters.toProductViewDTO
+import org.springframework.http.ResponseEntity
+
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -9,7 +13,14 @@ import org.springframework.web.bind.annotation.*
 class ProductController(private val productService: ProductService) {
 
     @GetMapping
-    fun getAllProducts() = productService.getAllProducts()
+    fun getAllProducts(@RequestParam isActive: Boolean = true): ResponseEntity<List<ProductViewDTO>> {
+        val products = if (isActive) {
+            productService.getActiveProducts().map { it.toProductViewDTO() }
+        } else {
+            productService.getAllProducts().map { it.toProductViewDTO() }
+        }
+        return ResponseEntity.ok(products)
+    }
 
     @GetMapping("/{id}")
     fun getProductById(@PathVariable id: Long) = productService.getProductById(id)

@@ -2,110 +2,91 @@ package com.example.cafelabservice.service
 
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.example.cafelabservice.entity.Order
-import com.example.cafelabservice.entity.Product
-import com.stripe.Stripe
+import com.example.cafelabservice.models.OrderProduct
+import com.example.cafelabservice.models.OrderToCreate
+import com.example.cafelabservice.models.dto.CartDTO
+import com.example.cafelabservice.models.dto.OrderRequestDTO
+import com.example.cafelabservice.models.dto.checkout.SubscriptionRequestDTO
+import com.example.cafelabservice.models.enums.OrderStatus
+import com.example.cafelabservice.models.enums.OrderType
 import com.stripe.model.checkout.Session
 import com.stripe.param.checkout.SessionCreateParams
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 
 @Service
-class CheckoutService() {
-
-    @Value("\${stripe.api.key}")
-    private lateinit var stripeApiKey: String
-    @Value("\${frontend.url}")
-    private lateinit var frontendUrl: String
-
+class CheckoutService(
+    private val subscriptionService: SubscriptionService,
+    private val stripeService: StripeService,
+    private val orderService: OrderService,
+    private val productService: ProductService
+) {
     private val objectMapper = jacksonObjectMapper().apply {
         disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
     }
 
-    fun generateCheckoutSession(order: Order): Session {
-        Stripe.apiKey = stripeApiKey
-        val products: List<Product> = objectMapper.readValue(order.products ?: "[]")
+    fun generateCheckoutSession(orderDTO: OrderRequestDTO): Session {
+        val toCreate = createOrderFromCart(orderDTO.cart)
 
-        val productDetails = products.map { product ->
+        val order = orderService.createOrder(
+            toCreate.toOrder()
+        )
+
+        val productDetails = toCreate.orderProducts.map { (product, quantity) ->
             SessionCreateParams.LineItem.builder()
-                .setPrice(product.priceId)
-                .setQuantity(1L)
+//                .setPrice(product.priceId)
+                .setPrice("price_1PB4qJRqqMn2mwDSRxzGdiql")
+                .setQuantity(quantity.toLong())
                 .build()
         }
 
-        val params = SessionCreateParams.builder()
-            .setAllowPromotionCodes(true)
-            .addAllCustomField(
-                listOf(
-                    SessionCreateParams.CustomField.builder()
-                        .setKey("special_instructions")
-                        .setLabel(
-                            SessionCreateParams.CustomField.Label.builder()
-                                .setType(SessionCreateParams.CustomField.Label.Type.CUSTOM)
-                                .setCustom("Mande-nos uma mensagem")
-                                .build()
-                        )
-                        .setType(SessionCreateParams.CustomField.Type.TEXT)
-                        .setOptional(true)
-                        .build()
-                )
+        return stripeService.createCheckoutSession(
+            productDetails,
+            order
+        )
+    }
+
+    fun generateCheckoutSessionForSubscriptions(subscriptionRequestDTO: SubscriptionRequestDTO): Session {
+        val subscription = subscriptionService.getSubscriptionById(subscriptionRequestDTO.subscription.id).orElseThrow { throw Exception("Subscription not found") }
+
+        val order = orderService.createOrder(
+            Order(
+                orderProducts = emptyList(),
+                total = subscription.price,
+                status = OrderStatus.PENDING,
+                variety = subscriptionRequestDTO.subscription.grindSize,
+                type = OrderType.SUBSCRICAO,
+                isTest = true
             )
-            .setSuccessUrl("$frontendUrl/success")
-            .setCancelUrl("$frontendUrl/cancel")
-            .addAllLineItem(productDetails)
-            .setMode(SessionCreateParams.Mode.PAYMENT)
-            .setBillingAddressCollection(SessionCreateParams.BillingAddressCollection.REQUIRED)
-            .setShippingAddressCollection(
-                SessionCreateParams.ShippingAddressCollection.builder()
-                    .addAllowedCountry(SessionCreateParams.ShippingAddressCollection.AllowedCountry.PT)
-                    .build()
-            )
-            .putMetadata("order_id", order.id.toString())
-            .addAllShippingOption(
-                listOf(
-                    SessionCreateParams.ShippingOption.builder()
-                        .setShippingRateData(
-                            SessionCreateParams.ShippingOption.ShippingRateData.builder()
-                                .setType(SessionCreateParams.ShippingOption.ShippingRateData.Type.FIXED_AMOUNT)
-                                .setFixedAmount(
-                                    SessionCreateParams.ShippingOption.ShippingRateData.FixedAmount.builder()
-                                        .setAmount(500L)
-                                        .setCurrency("eur")
-                                        .build()
-                                )
-                                .setDisplayName("Envio por CTT")
-                                .setDeliveryEstimate(
-                                    SessionCreateParams.ShippingOption.ShippingRateData.DeliveryEstimate.builder()
-                                        .setMinimum(
-                                            SessionCreateParams.ShippingOption.ShippingRateData.DeliveryEstimate.Minimum.builder()
-                                                .setUnit(SessionCreateParams.ShippingOption.ShippingRateData.DeliveryEstimate.Minimum.Unit.BUSINESS_DAY)
-                                                .setValue(5)
-                                                .build()
-                                        )
-                                        .setMaximum(
-                                            SessionCreateParams.ShippingOption.ShippingRateData.DeliveryEstimate.Maximum.builder()
-                                                .setUnit(SessionCreateParams.ShippingOption.ShippingRateData.DeliveryEstimate.Maximum.Unit.BUSINESS_DAY)
-                                                .setValue(7)
-                                                .build()
-                                        )
-                                        .build()
-                                )
-                                .build()
-                        )
-                        .build()
-                )
-            )
-            .setLocale(SessionCreateParams.Locale.PT)
-            .setInvoiceCreation(
-                SessionCreateParams.InvoiceCreation.builder()
-                    .setEnabled(true)
-                    .build()
-            )
+        )
+
+        val productDetails = SessionCreateParams.LineItem.builder()
+            .setPrice(subscription.priceId)
+            .setQuantity(1L)
             .build()
 
-        val session =  Session.create(params)
+        return stripeService.createCheckoutSession(
+            listOf(productDetails),
+            order
+        )
+    }
 
-        return session
+    fun createOrderFromCart(cart: CartDTO): OrderToCreate{
+        val productQuantityMap = cart.items.associate {
+            val product = productService.getProductById(it.id).orElseThrow { Exception("Product id " + it.id + " not found") }
+            product to it.quantity
+        }
+
+        val total = productQuantityMap.entries.sumOf { (product, quantity) -> product.preco * quantity }
+
+        return OrderToCreate(
+            orderProducts = productQuantityMap,
+            total = total,
+            status = OrderStatus.CREATED,
+            variety = cart.grindSize,
+            type = OrderType.LOJA,
+            isTest = true,
+            objectMapper = objectMapper
+        )
     }
 }

@@ -1,6 +1,7 @@
 package com.example.cafelabservice.service
 
 import com.example.cafelabservice.entity.Product
+import com.example.cafelabservice.models.OrderProduct
 import com.example.cafelabservice.repositories.ProductRepository
 import org.springframework.stereotype.Service
 
@@ -8,6 +9,8 @@ import org.springframework.stereotype.Service
 class ProductService(private val productRepository: ProductRepository) {
 
     fun getAllProducts() = productRepository.findAll()
+
+    fun getActiveProducts() = productRepository.findAllByIsActiveTrue()
 
     fun getProductById(id: Long) = productRepository.findById(id)
 
@@ -36,4 +39,8 @@ class ProductService(private val productRepository: ProductRepository) {
     }
 
     fun deleteProduct(id: Long) = productRepository.deleteById(id)
+
+    fun toProduct(orderProduct: OrderProduct): Product? {
+        return productRepository.findById(orderProduct.productId).orElse(null)
+    }
 }
