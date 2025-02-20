@@ -1,11 +1,15 @@
-package com.example.cafelabservice.controllers
+package com.example.cafelabservice.controllers.v1
 
 import com.example.cafelabservice.entity.Balance
+import com.example.cafelabservice.models.dto.BalanceDTO
+import com.example.cafelabservice.models.dto.BalanceDTO.Companion.toEntity
 import com.example.cafelabservice.models.dto.BalanceDetailsDTO
 import com.example.cafelabservice.models.dto.BalanceDetailsDTO.Companion.toDtoList
 import com.example.cafelabservice.service.BalanceService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import jakarta.validation.Valid
+import org.springframework.http.HttpStatus
 import java.time.LocalDate
 
 @RestController
@@ -28,17 +32,18 @@ class BalanceController(private val balanceService: BalanceService) {
     }
 
     @GetMapping("/timeseries")
-    fun getBalancesByTimeSeries(@RequestParam startDate: LocalDate?  = LocalDate.parse("2024-01-01"), @RequestParam endDate: LocalDate? = LocalDate.now()): BalanceDetailsDTO {
-        return balanceService.getBalancesByTimeSeries(startDate!!, endDate!!).toDtoList()
+    fun getBalancesByTimeSeries(@RequestParam startDate: LocalDate?  = LocalDate.parse("2024-01-01"), @RequestParam endDate: LocalDate? = LocalDate.now()): BalanceDetailsDTO? {
+        return balanceService.getBalancesByTimeSeries(startDate!!, endDate!!).ifEmpty { return null }.toDtoList()
     }
 
     @PostMapping
-    fun createBalance(@RequestBody balance: Balance): Balance {
-        return balanceService.createBalance(balance)
+    @ResponseStatus(HttpStatus.CREATED)
+    fun createBalance(@RequestBody @Valid balance: BalanceDTO): Balance {
+        return balanceService.createBalance(balance.toEntity())
     }
 
     @PutMapping("/{id}")
-    fun updateBalance(@PathVariable id: Long, @RequestBody balance: Balance): ResponseEntity<Balance> {
+    fun updateBalance(@PathVariable id: Long, @RequestBody balance: BalanceDTO): ResponseEntity<Balance> {
         val updatedBalance = balanceService.updateBalance(id, balance)
         return if (updatedBalance != null) {
             ResponseEntity.ok(updatedBalance)

@@ -18,7 +18,7 @@ data class User(
     val address: String? = null,
     val nif: String? = null,
     val username: String? = null,
-    val password: String? = null,
+    val password: String,
     @Convert(converter = JsonbListConverter::class)
     @Column(columnDefinition = "jsonb")
     val role: List<String>? = null,

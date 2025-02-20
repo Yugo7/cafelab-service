@@ -1,9 +1,8 @@
-package com.example.cafelabservice.controllers
+package com.example.cafelabservice.controllers.v1
 
 import com.example.cafelabservice.service.WebhookService
 import com.google.gson.JsonSyntaxException
 import com.stripe.model.Event
-import com.stripe.model.EventDataObjectDeserializer
 import com.stripe.net.ApiResource
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -23,7 +22,6 @@ class WebhooksController(
         } catch (e: JsonSyntaxException) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.localizedMessage)
         }
-
 
         return ResponseEntity.status(HttpStatus.OK).body(null)
     }

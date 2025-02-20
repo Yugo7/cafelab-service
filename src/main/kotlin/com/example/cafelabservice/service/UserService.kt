@@ -21,6 +21,8 @@ class UserService(
 
     fun getUserById(id: Long) = userRepository.findById(id)
 
+    fun getUserByUsername(username: String) = userRepository.findByUsername(username)
+
     fun createUser(user: User) = userRepository.save(user)
 
     fun updateUser(id: Long, newUser: User) {
@@ -58,7 +60,9 @@ class UserService(
     fun signInUser(email: String, password: String): String? {
         val user = userRepository.findByEmail(email) ?: return null
         return if (BCrypt.checkpw(password, user.password)) {
-            JwtUtil.generateToken(user)
+            //JwtUtil.generateToken(user)
+            println("Sign in errado")
+            null
         } else {
             null
         }

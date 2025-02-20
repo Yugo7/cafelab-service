@@ -1,6 +1,5 @@
-package com.example.cafelabservice.controllers
+package com.example.cafelabservice.controllers.v1
 
-import com.example.cafelabservice.models.EmailRequest
 import com.example.cafelabservice.models.dto.EmailRequestIncomingDTO
 import com.example.cafelabservice.service.EmailService
 import com.example.cafelabservice.service.MailMarketingService

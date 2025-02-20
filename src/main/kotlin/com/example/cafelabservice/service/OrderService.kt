@@ -47,12 +47,11 @@ class OrderService(private val orderRepository: OrderRepository) {
     fun updateFromCheckoutSessionCompleted(
         orderId: Long,
         receiptUrl: String,
-        total: Double,
+        total: String,
         userId: String,
         note: String,
         sessionId: String?,
-    ) {
-        orderRepository.findOrderById(orderId).let { order ->
+    ): Order? = orderRepository.findOrderById(orderId).let { order ->
             orderRepository.save(
                 order.copy(
                     receiptUrl = receiptUrl,
@@ -65,4 +64,3 @@ class OrderService(private val orderRepository: OrderRepository) {
             )
         }
     }
-}

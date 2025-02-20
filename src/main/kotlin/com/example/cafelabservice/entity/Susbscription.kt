@@ -19,5 +19,5 @@ data class Subscription(
     val description: String? = null,
     val image: String? = null,
     val periodicityString: String? = null,
-    val price: Double? = null
+    val price: String? = null
 )

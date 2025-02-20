@@ -34,8 +34,7 @@ class CheckoutService(
 
         val productDetails = toCreate.orderProducts.map { (product, quantity) ->
             SessionCreateParams.LineItem.builder()
-//                .setPrice(product.priceId)
-                .setPrice("price_1PB4qJRqqMn2mwDSRxzGdiql")
+                .setPrice(product.priceId)
                 .setQuantity(quantity.toLong())
                 .build()
         }

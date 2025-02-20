@@ -1,5 +1,6 @@
 package com.example.cafelabservice.controllers
 
+import com.example.cafelabservice.controllers.v1.BalanceController
 import com.example.cafelabservice.entity.Balance
 import com.example.cafelabservice.entity.ChangeType
 import com.example.cafelabservice.service.BalanceService
@@ -11,6 +12,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 
@@ -22,8 +24,8 @@ class BalanceControllerTest(
     @Test
     fun getAllBalances() {
         val balances = listOf(
-            Balance(1, LocalDateTime.now(), LocalDateTime.now(), "Income", "Order completed", 100.0, ChangeType.INCOME),
-            Balance(2, LocalDateTime.now(), LocalDateTime.now(), "Expense", "Shipping", -50.0, ChangeType.EXPENSE)
+            Balance(1, LocalDateTime.now(), LocalDateTime.now(), LocalDate.now(),"Income", "Order completed", 100, ChangeType.INCOME),
+            Balance(2, LocalDateTime.now(), LocalDateTime.now(), LocalDate.now(), "Expense", "Shipping", -50, ChangeType.EXPENSE)
         )
         every { balanceService.getAllBalances() } returns balances
 

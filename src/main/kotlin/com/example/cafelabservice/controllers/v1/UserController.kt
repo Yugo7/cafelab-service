@@ -1,4 +1,4 @@
-package com.example.cafelabservice.controllers
+package com.example.cafelabservice.controllers.v1
 
 import com.example.cafelabservice.entity.User
 import com.example.cafelabservice.models.dto.SignInRequestDTO
@@ -8,13 +8,13 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/user")
 class UserController(
     private val userService: UserService,
     private val orderService: OrderService
 ) {
 
-    @PostMapping("/")
+    @PostMapping
     fun createUser(@RequestBody customer: User): ResponseEntity<Any> {
         return try {
             val data = userService.createUser(customer)
@@ -54,7 +54,7 @@ class UserController(
         }
     }
 
-    @GetMapping("/")
+    @GetMapping
      fun getAllUsers(): ResponseEntity<Any> {
         return try {
             val users = userService.getAllUsers()
@@ -67,6 +67,7 @@ class UserController(
     @GetMapping("/{userId}/orders")
      fun getOrdersByUserId(@PathVariable userId: String): ResponseEntity<Any> {
         return try {
+
             val orders = orderService.getOrdersByUserId(userId)
             if (orders.isNotEmpty()) {
                 ResponseEntity.ok(orders)

@@ -3,11 +3,13 @@ package com.example.cafelabservice.service
 import com.example.cafelabservice.entity.Product
 import com.example.cafelabservice.models.OrderProduct
 import com.example.cafelabservice.repositories.ProductRepository
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service
 
 @Service
 class ProductService(private val productRepository: ProductRepository) {
 
+    @PreAuthorize("hasRole('admin')")
     fun getAllProducts() = productRepository.findAll()
 
     fun getActiveProducts() = productRepository.findAllByIsActiveTrue()

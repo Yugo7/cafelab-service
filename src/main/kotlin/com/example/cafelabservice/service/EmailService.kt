@@ -1,8 +1,7 @@
 package com.example.cafelabservice.service
 
 import com.example.cafelabservice.entity.EmailLog
-import com.example.cafelabservice.models.EmailRequest
-import com.example.cafelabservice.models.dto.EmailRequestIncomingDTO
+import com.example.cafelabservice.entity.Order
 import com.example.cafelabservice.repositories.EmailLogRepository
 import jakarta.mail.internet.MimeMessage
 import org.springframework.beans.factory.annotation.Value
@@ -16,7 +15,8 @@ import java.nio.file.Files
 @Service
 class EmailService(
     private val mailSender: JavaMailSender,
-    private val emailLogRepository: EmailLogRepository
+    private val emailLogRepository: EmailLogRepository,
+    private val productService: ProductService
 ) {
 
     @Value("\${frontend.url}")
@@ -42,6 +42,27 @@ class EmailService(
             content = emailContent
         )
         emailLogRepository.save(emailLog)
+    }
+
+    fun sendOrderConfirmationEmail(to: String, order: Order) {
+        val orderConfirmationTemplate = ClassPathResource("templates/order-confirmation.html")
+        val productItemTemplate = ClassPathResource("templates/components/product-item.html")
+
+        val orderConfirmationContent = Files.readString(orderConfirmationTemplate.file.toPath(), StandardCharsets.UTF_8)
+
+        val productsHtml = order.orderProducts.joinToString(separator = "") { orderProduct ->
+            val product = productService.getProductById(orderProduct.productId).orElseThrow { throw NoSuchElementException("No product with id ${orderProduct.productId}") }
+            Files.readString(productItemTemplate.file.toPath(), StandardCharsets.UTF_8)
+                    .replace("{{quantity}}", orderProduct.quantity.toString())
+                    .replace("{{product_name}}", product.nomePt ?: product.nomeEn ?: "")
+                    .replace("{{description_1}}", product.descricaoPt)
+                    .replace("{{description_2}}", product.origem)
+                    .replace("{{price}}", product.preco.toString())
+        }
+
+        val finalEmailContent = orderConfirmationContent.replace("{{products_list}}", productsHtml)
+
+        sendEmail(null, listOf(to), "Order Confirmation #${order.id}", finalEmailContent)
     }
 
     fun sendPasswordResetEmail(to: String, token: String) {

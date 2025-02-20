@@ -16,7 +16,8 @@ class WebhookService(
     private val webhookEventsRepository: WebhookEventsRepository,
     private val stripeService: StripeService,
     private val downloadService: DownloadService,
-    private val orderService: OrderService
+    private val orderService: OrderService,
+    private val emailService: EmailService
 ) {
     private val logger: Logger = LoggerFactory.getLogger(WebhookService::class.java)
 
@@ -60,6 +61,7 @@ class WebhookService(
         val stripeInvoice = invoice.let {
             stripeService.getInvoice(stripeEventObject.invoice)
         }
+
         val updatedOrder = stripeEventObject.metadata.get("order_id")?.let { orderId ->
             val pdfUrl = runBlocking {
                 downloadService.downloadAndUploadPdf(stripeInvoice.invoicePdf, orderId)
@@ -68,14 +70,15 @@ class WebhookService(
             orderService.updateFromCheckoutSessionCompleted(
                 orderId.toLong(),
                 pdfUrl,
-                stripeInvoice.total.toDouble() / 100,
+                stripeInvoice.total.toString(),
                 stripeEventObject.customerEmail,
                 stripeEventObject.customFields.get(0).key,
                 stripeEventObject.id
             )
         }
 
-        //send email to user
+        require(updatedOrder != null) { "There was an error updating order ${stripeEventObject.id}" }
+        emailService.sendOrderConfirmationEmail(stripeEventObject.customerEmail, updatedOrder)
         //create guest or update user
 
         println("Checkout session completed!")

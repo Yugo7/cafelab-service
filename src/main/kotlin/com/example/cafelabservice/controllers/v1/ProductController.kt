@@ -1,10 +1,11 @@
-package com.example.cafelabservice.controllers
+package com.example.cafelabservice.controllers.v1
 
 import com.example.cafelabservice.entity.Product
 import com.example.cafelabservice.models.dto.ProductViewDTO
 import com.example.cafelabservice.service.ProductService
 import com.example.cafelabservice.utils.converters.toProductViewDTO
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.prepost.PreAuthorize
 
 import org.springframework.web.bind.annotation.*
 
@@ -13,7 +14,8 @@ import org.springframework.web.bind.annotation.*
 class ProductController(private val productService: ProductService) {
 
     @GetMapping
-    fun getAllProducts(@RequestParam isActive: Boolean = true): ResponseEntity<List<ProductViewDTO>> {
+    fun getAllProducts(@RequestParam isActive: Boolean = true, ): ResponseEntity<List<ProductViewDTO>> {
+
         val products = if (isActive) {
             productService.getActiveProducts().map { it.toProductViewDTO() }
         } else {

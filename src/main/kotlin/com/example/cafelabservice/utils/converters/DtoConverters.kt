@@ -16,9 +16,7 @@ fun Product.toProductViewDTO(): ProductViewDTO {
         secao = this.secao.name,
         descricaoEn = this.descricaoEn,
         nomeEn = this.nomeEn,
-        priceId = this.priceId,
         sizePt = this.sizePt,
-        sizeEn = this.sizeEn,
-        isActive = this.isActive
+        sizeEn = this.sizeEn
     )
 }

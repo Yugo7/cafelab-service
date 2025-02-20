@@ -21,14 +21,10 @@ data class ProductViewDTO(
     val descricaoEn: String?,
     @JsonProperty("nome_en")
     val nomeEn: String?,
-    @JsonProperty("price_id")
-    val priceId: String?,
     @JsonProperty("size_pt")
     val sizePt: String?,
     @JsonProperty("size_en")
-    val sizeEn: String?,
-    @JsonProperty("is_active")
-    val isActive: Boolean
+    val sizeEn: String?
 ){
     companion object{
         fun fromProduct(product: Product): ProductViewDTO {
@@ -44,10 +40,8 @@ data class ProductViewDTO(
                 secao = product.secao.name,
                 descricaoEn = product.descricaoEn,
                 nomeEn = product.nomeEn,
-                priceId = product.priceId,
                 sizePt = product.sizePt,
-                sizeEn = product.sizeEn,
-                isActive = product.isActive
+                sizeEn = product.sizeEn
             )
         }
     }

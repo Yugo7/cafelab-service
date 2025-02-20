@@ -1,4 +1,4 @@
-package com.example.cafelabservice.controllers
+package com.example.cafelabservice.controllers.v1
 
 import com.example.cafelabservice.entity.Order
 import com.example.cafelabservice.models.dto.OrderResponseDTO

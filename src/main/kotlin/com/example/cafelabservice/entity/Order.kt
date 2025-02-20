@@ -1,6 +1,7 @@
 package com.example.cafelabservice.entity
 
 import com.example.cafelabservice.models.OrderProduct
+import com.example.cafelabservice.models.dto.OrderProductToQuantity
 import com.example.cafelabservice.models.dto.OrderResponseDTO
 import com.example.cafelabservice.models.dto.ProductViewDTO
 import com.example.cafelabservice.models.enums.OrderStatus
@@ -22,7 +23,7 @@ data class Order(
     @CollectionTable(name = "order_product", indexes = [Index(name = "id", columnList = "order_Id")])
     val orderProducts: List<OrderProduct> = mutableListOf(),
 
-    val total: Double? = null,
+    val total: String? = null,
     @Enumerated(EnumType.STRING)
     @JdbcType(PostgreSQLEnumJdbcType::class)
     val status: OrderStatus = OrderStatus.PENDING,
@@ -44,12 +45,17 @@ data class Order(
     fun toOrderResponseDTO(productService: ProductService): OrderResponseDTO {
         return OrderResponseDTO(
             id = id,
-            products = orderProducts.map { ProductViewDTO.fromProduct(productService.getProductById(it.productId).orElseThrow { Exception("Product not found") }) },
+            cart = orderProducts.map {
+                OrderProductToQuantity(ProductViewDTO.fromProduct(
+                    productService.getProductById(it.productId)
+                        .orElseThrow { Exception("Product not found") }), it.quantity)
+            },
             status = status.nome,
             user = user.toString(),
             createdAt = createdAt,
             receiptUrl = receiptUrl,
             grindSize = variety ?: "",
+            total = total ?: "",
             note = note,
             type = type
         )

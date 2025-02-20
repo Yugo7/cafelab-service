@@ -33,7 +33,7 @@ data class OrderToCreate(
                     quantity = quantity
                 )
             },
-            total = total,
+            total = total?.let { String.format("%.2f", it) } ?: "0.00",
             status = status ?: OrderStatus.PENDING,
             userId = userId,
             user = user,
