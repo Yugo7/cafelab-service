@@ -7,12 +7,11 @@ import com.example.cafelabservice.repositories.OrderRepository
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
-import kotlin.jvm.internal.Ref.DoubleRef
 
 @Service
 class OrderService(private val orderRepository: OrderRepository) {
 
-    fun getAllOrders(pageable: Pageable): Page<Order> = orderRepository.findAll(pageable)
+    fun getAllOrders(pageable: Pageable): Page<Order> = orderRepository.findAllActiveOrders(pageable)
 
     fun getOrderById(id: Long): Order = orderRepository.findById(id).orElseThrow { throw NoSuchElementException() }
 

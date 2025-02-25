@@ -6,6 +6,7 @@ import com.example.cafelabservice.models.enums.OrderStatus.Companion.validStatus
 import com.example.cafelabservice.models.enums.OrderType
 import jakarta.persistence.EntityManager
 import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import java.time.ZonedDateTime
@@ -22,6 +23,8 @@ interface OrderRepositoryCustom {
     fun countOrdersByStatus(): Map<OrderStatus, Long>
 
     fun countOrdersByLastMonths(numberMonths: Int): Map<String, Long>
+
+    fun findAllActiveOrders(pageable: Pageable): Page<Order>
 }
 
 class OrderRepositoryCustomImpl(
@@ -59,5 +62,25 @@ class OrderRepositoryCustomImpl(
         query.setParameter("startDate", startDate)
         val resultList = query.resultList
         return resultList.associate { (it[0] as String) to (it[1] as Long) }
+    }
+
+    override fun findAllActiveOrders(pageable: Pageable): Page<Order> {
+        val query = entityManager.createQuery(
+            "SELECT o FROM Order o WHERE o.status IN :validStatuses",
+            Order::class.java
+        )
+        query.setParameter("validStatuses", OrderStatus.validStatuses)
+        query.firstResult = pageable.offset.toInt()
+        query.maxResults = pageable.pageSize
+
+        val orders = query.resultList
+        val countQuery = entityManager.createQuery(
+            "SELECT COUNT(o) FROM Order o WHERE o.status IN :validStatuses",
+            Long::class.javaObjectType
+        )
+        countQuery.setParameter("validStatuses", OrderStatus.validStatuses)
+        val total = countQuery.singleResult
+
+        return PageImpl(orders, pageable, total)
     }
 }
