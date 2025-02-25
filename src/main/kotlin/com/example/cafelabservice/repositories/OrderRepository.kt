@@ -30,21 +30,23 @@ interface OrderRepositoryCustom {
 class OrderRepositoryCustomImpl(
     private val entityManager: EntityManager
 ) : OrderRepositoryCustom {
+
     override fun countOrdersByType(): Map<OrderType, Long> {
         val query = entityManager.createQuery(
             "SELECT o.type, COUNT(o) FROM Order o WHERE o.status IN :validStatuses GROUP BY o.type",
             Array<Any>::class.java
         )
-        query.setParameter("validStatuses", validStatuses)
+        query.setParameter("validStatuses", OrderStatus.validStatuses)
         val resultList = query.resultList
         return resultList.associate { it[0] as OrderType to it[1] as Long }
     }
 
     override fun countOrdersByStatus(): Map<OrderStatus, Long> {
         val query = entityManager.createQuery(
-            "SELECT o.status, COUNT(o) FROM Order o GROUP BY o.status",
+            "SELECT o.status, COUNT(o) FROM Order o WHERE o.status IN :validStatuses GROUP BY o.status",
             Array<Any>::class.java
         )
+        query.setParameter("validStatuses", OrderStatus.validStatuses)
         val resultList = query.resultList
         return resultList.associate { it[0] as OrderStatus to it[1] as Long }
     }
@@ -58,7 +60,7 @@ class OrderRepositoryCustomImpl(
                     "ORDER BY TO_CHAR(o.createdAt, 'YYYY/MM')",
             Array<Any>::class.java
         )
-        query.setParameter("validStatuses", validStatuses)
+        query.setParameter("validStatuses", OrderStatus.validStatuses)
         query.setParameter("startDate", startDate)
         val resultList = query.resultList
         return resultList.associate { (it[0] as String) to (it[1] as Long) }
