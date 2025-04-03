@@ -42,22 +42,5 @@ data class Order(
     val type: OrderType = OrderType.LOJA,
     val isTest: Boolean = false
 ) {
-    fun toOrderResponseDTO(productService: ProductService): OrderResponseDTO {
-        return OrderResponseDTO(
-            id = id,
-            cart = orderProducts.map {
-                OrderProductToQuantity(ProductViewDTO.fromProduct(
-                    productService.getProductById(it.productId)
-                        .orElseThrow { Exception("Product not found") }), it.quantity)
-            },
-            status = status.nome,
-            user = user.toString(),
-            createdAt = createdAt,
-            receiptUrl = receiptUrl,
-            grindSize = variety ?: "",
-            total = total ?: "",
-            note = note,
-            type = type
-        )
-    }
+
 }

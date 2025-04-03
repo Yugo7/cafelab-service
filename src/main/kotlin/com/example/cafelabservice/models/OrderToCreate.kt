@@ -10,7 +10,7 @@ import java.time.ZonedDateTime
 data class OrderToCreate(
     val id: Long = 0,
     val orderProducts: Map<Product, Int>,
-    val total: Double? = null,
+    val total: String? = null,
     val status: OrderStatus? = null,
     val userId: String? = null,
     val user: Int? = null,
@@ -33,7 +33,7 @@ data class OrderToCreate(
                     quantity = quantity
                 )
             },
-            total = total?.let { String.format("%.2f", it) } ?: "0.00",
+            total = total ?: "0.00",
             status = status ?: OrderStatus.PENDING,
             userId = userId,
             user = user,

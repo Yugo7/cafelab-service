@@ -3,6 +3,7 @@ package com.example.cafelabservice.controllers.v1
 import com.example.cafelabservice.entity.Order
 import com.example.cafelabservice.models.dto.OrderResponseDTO
 import com.example.cafelabservice.models.dto.OrderSummaryDTO
+import com.example.cafelabservice.models.dto.toOrderResponseDTO
 import com.example.cafelabservice.service.OrderService
 import com.example.cafelabservice.service.ProductService
 import org.springframework.data.domain.Page
@@ -23,7 +24,7 @@ class OrderController(
         @RequestParam(defaultValue = "10") size: Int
     ): Page<OrderResponseDTO> {
         val pageable = PageRequest.of(page, size)
-        return orderService.getAllOrders(pageable).map { it.toOrderResponseDTO(productService) }
+        return orderService.getAllOrders(pageable).map { order -> order.toOrderResponseDTO(productService) }
     }
     @GetMapping("/{id}")
     fun getOrderById(@PathVariable id: Long) = orderService.getOrderById(id)

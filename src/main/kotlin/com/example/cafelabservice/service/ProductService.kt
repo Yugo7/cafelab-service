@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service
 @Service
 class ProductService(private val productRepository: ProductRepository) {
 
-    @PreAuthorize("hasRole('admin')")
+    //@PreAuthorize("hasRole('admin')")
     fun getAllProducts() = productRepository.findAll()
 
     fun getActiveProducts() = productRepository.findAllByIsActiveTrue()

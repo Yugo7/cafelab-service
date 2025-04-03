@@ -20,6 +20,14 @@ class ExceptionHandler {
         return ResponseEntity("Resource not found: ${ex.message}", HttpStatus.NOT_FOUND)
     }
 
+    @ExceptionHandler(StripeWebhookPayloadException::class)
+    fun handleStripeWebhookPayloadException(
+        ex: StripeWebhookPayloadException,
+        request: WebRequest
+    ): ResponseEntity<String> {
+        return ResponseEntity("Webhook processing exception: ${ex.message}", HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+
     @ExceptionHandler(Exception::class)
     fun handleGlobalException(ex: Exception, request: WebRequest): ResponseEntity<String> {
         return ResponseEntity("An error occurred: ${ex.message}", HttpStatus.INTERNAL_SERVER_ERROR)

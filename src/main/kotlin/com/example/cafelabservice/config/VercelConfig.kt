@@ -7,5 +7,7 @@ data class VercelConfig(
     val token: String,
     val projectId: String,
     val teamId: String,
-    val url: String
+    val url: String,
+    val blobUrl: String,
+    val blobToken: String
 )

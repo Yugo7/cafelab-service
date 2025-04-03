@@ -16,11 +16,11 @@ data class PasswordToken(
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    val user: User? = null,
+    val user: User,
 
     @Column(name = "expires_at")
-    val expiresAt: LocalDateTime? = null,
+    val expiresAt: LocalDateTime,
 
     @Column(name = "token")
-    val token: String? = null
+    val token: String
 )

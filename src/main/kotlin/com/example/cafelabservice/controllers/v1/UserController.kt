@@ -3,6 +3,7 @@ package com.example.cafelabservice.controllers.v1
 import com.example.cafelabservice.entity.User
 import com.example.cafelabservice.models.dto.SignInRequestDTO
 import com.example.cafelabservice.service.OrderService
+import com.example.cafelabservice.service.ProductService
 import com.example.cafelabservice.service.UserService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -11,7 +12,8 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/user")
 class UserController(
     private val userService: UserService,
-    private val orderService: OrderService
+    private val orderService: OrderService,
+    private val productService: ProductService
 ) {
 
     @PostMapping
@@ -25,19 +27,20 @@ class UserController(
     }
 
     @PostMapping("/forgot-password")
-    fun requestChangePassword(@RequestBody email: String): ResponseEntity<Any> {
+    fun requestChangePassword(@RequestBody request: ChangePasswordRequest): ResponseEntity<Any> {
         return try {
-            val data = userService.requestPasswordReset(email)
+            val data = userService.requestPasswordReset(request.email)
             ResponseEntity.ok(data)
         } catch (e: Exception) {
             ResponseEntity.status(500).body(mapOf("error" to e.message))
         }
     }
 
+
     @PostMapping("/change-password/{token}")
-     fun resetPassword(@PathVariable token: String, @RequestBody password: String): ResponseEntity<Any> {
+     fun resetPassword(@PathVariable token: String, @RequestBody request: PasswordChangeRequest): ResponseEntity<Any> {
         return try {
-            val data = userService.resetPassword(token, password)
+            val data = userService.resetPassword(token, request.password)
             ResponseEntity.ok(data)
         } catch (e: Exception) {
             ResponseEntity.status(500).body(mapOf("error" to e.message))
@@ -64,18 +67,17 @@ class UserController(
         }
     }
 
-    @GetMapping("/{userId}/orders")
-     fun getOrdersByUserId(@PathVariable userId: String): ResponseEntity<Any> {
+    @GetMapping("/orders")
+     fun getOrdersByUserId(@RequestHeader("Authorization") authorization: String): ResponseEntity<Any> {
         return try {
-
-            val orders = orderService.getOrdersByUserId(userId)
-            if (orders.isNotEmpty()) {
-                ResponseEntity.ok(orders)
-            } else {
-                ResponseEntity.status(404).body(mapOf("msg" to "No orders found for this user"))
-            }
+            val user = userService.getUserFromToken(authorization.removePrefix("Bearer "))
+            return ResponseEntity.ok(userService.getAuthenticatedUserInfo(user))
         } catch (e: Exception) {
             ResponseEntity.status(500).body(mapOf("msg" to e.message))
         }
     }
 }
+
+data class PasswordChangeRequest(val password: String)
+
+data class ChangePasswordRequest(val email: String)

@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface WebhookEventsRepository: JpaRepository<WebhookEvent, Long> {
-    fun getEventByEventTypeIdAndType(eventTypeId: String, type: String)
+    fun getEventByEventTypeIdAndType(eventTypeId: String, type: String): WebhookEvent?
 }

@@ -2,11 +2,22 @@ package com.example.cafelabservice.service
 
 import com.example.cafelabservice.config.VercelConfig
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.ktor.client.*
+import io.ktor.client.call.*
+import io.ktor.client.engine.cio.*
+import io.ktor.client.request.*
+import io.ktor.client.request.forms.*
+import io.ktor.http.*
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.io.File
 import java.net.HttpURLConnection
 import java.net.URI
+
 
 @Service
 class VercelService(
@@ -69,6 +80,30 @@ class VercelService(
             val jsonResponse = objectMapper.readTree(response)
             logger.error("GET request failed: $responseCode, message: ${jsonResponse["error"]["message"]}")
             return null
+        }
+    }
+
+    suspend fun uploadFileToVercelBlob(file: File): String? {
+        val client = HttpClient(CIO)
+
+        return try {
+            val response = client.put(vercel.blobUrl) {
+                headers {
+                    append(HttpHeaders.Authorization, "Bearer ${vercel.blobToken}")
+                    append(HttpHeaders.ContentType, "image/jpeg")
+                    append(HttpHeaders.ContentDisposition, "filename=\"${file.name}\"")
+                }
+                setBody(file.readBytes())
+            }
+            println("Upload successful: ${response.status}")
+            val responseBody = response.body<String>()
+            val jsonResponse = Json.parseToJsonElement(responseBody).jsonObject
+            jsonResponse["url"]?.jsonPrimitive?.content
+        } catch (e: Exception) {
+            println("Error uploading file: ${e.message}")
+            null
+        } finally {
+            client.close()
         }
     }
 }

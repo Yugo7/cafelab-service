@@ -23,7 +23,7 @@ data class Product(
     val descricaoPt: String = "",
     val origem: String = "",
     val grao: String = "",
-    val preco: Double = 0.0,
+    var preco: String,
     val imagem: String? = null,
     @Enumerated(EnumType.STRING)
     val secao: Secao = Secao.BOUTIQUE,

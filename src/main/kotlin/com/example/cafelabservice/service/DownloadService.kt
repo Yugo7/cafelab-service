@@ -10,13 +10,16 @@ import io.ktor.http.*
 import io.ktor.serialization.gson.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.io.IOException
 
 @Service
 class DownloadService(
     private val blobService: BlobService
 ) {
+    private val logger: Logger = LoggerFactory.getLogger(AnalyticsService::class.java)
+
     private val client = HttpClient(CIO) {
         install(ContentNegotiation) {
             gson {
@@ -25,19 +28,19 @@ class DownloadService(
         }
     }
 
-    suspend fun downloadPdf(url: String): ByteArray {
+    suspend fun downloadPdf(url: String): ByteArray? {
         println("Downloading PDF from: $url")
         return withContext(Dispatchers.IO) {
             val response: HttpResponse = client.get(url)
             if (!response.status.isSuccess()) {
-                throw IOException("Unexpected response code: ${response.status}")
+                logger.error("Unexpected response code ${response.status} from $url")
+                null
             }
             response.body()
         }
     }
 
-    suspend fun downloadAndUploadPdf(pdfUrl: String, orderId: String): String {
-        val pdfData = downloadPdf(pdfUrl)
-        return blobService.uploadPdfToBlob("receipt-order$orderId${System.currentTimeMillis()}", pdfData)
+    suspend fun uploadPdf(pdfData: ByteArray, orderId: String): String {
+        return blobService.uploadPdfToBlob("receipt-order$orderId${System.currentTimeMillis()}.pdf", pdfData)
     }
 }

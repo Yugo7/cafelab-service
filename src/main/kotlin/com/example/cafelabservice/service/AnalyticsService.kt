@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.context.annotation.Bean
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -46,8 +45,8 @@ class AnalyticsService(
         try {
             vercelService.getTimeSeriesData(
                 "event_data",
-                LocalDate.parse("2024-04-19").format(DateTimeFormatter.ISO_DATE) + "T00%3A00%3A00.000Z",
-                LocalDate.parse("2024-06-18").format(DateTimeFormatter.ISO_DATE) + "T00%3A00%3A00.000Z",
+                LocalDate.parse("2025-02-20").format(DateTimeFormatter.ISO_DATE) + "T00%3A00%3A00.000Z",
+                LocalDate.parse("2025-03-18").format(DateTimeFormatter.ISO_DATE) + "T00%3A00%3A00.000Z",
             )?.let { jsonResponse ->
                 logger.info("Fetching analytics data: " + jsonResponse.count())
                 val data = objectMapper.readValue(jsonResponse, ResponseWithObjects::class.java)

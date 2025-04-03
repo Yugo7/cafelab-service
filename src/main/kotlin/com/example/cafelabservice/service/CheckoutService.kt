@@ -19,7 +19,8 @@ class CheckoutService(
     private val subscriptionService: SubscriptionService,
     private val stripeService: StripeService,
     private val orderService: OrderService,
-    private val productService: ProductService
+    private val productService: ProductService,
+    private val userService: UserService
 ) {
     private val objectMapper = jacksonObjectMapper().apply {
         disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
@@ -34,14 +35,18 @@ class CheckoutService(
 
         val productDetails = toCreate.orderProducts.map { (product, quantity) ->
             SessionCreateParams.LineItem.builder()
-                .setPrice(product.priceId)
+                //.setPrice(product.priceId)
+                .setPrice("price_1QodX7RqqMn2mwDSf7dfh0Ig")
                 .setQuantity(quantity.toLong())
                 .build()
         }
 
+        val user = orderDTO.cart.user?.email?.let { userService.getUserByUsername(it) }
+
         return stripeService.createCheckoutSession(
             productDetails,
-            order
+            order,
+            user
         )
     }
 
@@ -59,14 +64,18 @@ class CheckoutService(
             )
         )
 
+        val user = subscriptionRequestDTO.user?.email?.let { userService.getUserByUsername(it) }
+
         val productDetails = SessionCreateParams.LineItem.builder()
-            .setPrice(subscription.priceId)
+            //.setPrice(subscription.priceId)
+            .setPrice("price_1QodX7RqqMn2mwDSf7dfh0Ig")
             .setQuantity(1L)
             .build()
 
         return stripeService.createCheckoutSession(
             listOf(productDetails),
-            order
+            order,
+            user
         )
     }
 
@@ -75,12 +84,11 @@ class CheckoutService(
             val product = productService.getProductById(it.id).orElseThrow { Exception("Product id " + it.id + " not found") }
             product to it.quantity
         }
-
-        val total = productQuantityMap.entries.sumOf { (product, quantity) -> product.preco * quantity }
+        val total = productQuantityMap.entries.sumOf { (product, quantity) -> product.preco.toBigInteger().times(quantity.toBigInteger()) }
 
         return OrderToCreate(
             orderProducts = productQuantityMap,
-            total = total,
+            total = total.toString(),
             status = OrderStatus.CREATED,
             variety = cart.grindSize,
             type = OrderType.LOJA,

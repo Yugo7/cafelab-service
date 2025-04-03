@@ -33,6 +33,8 @@ class SecurityConfig(
                 csrf.ignoringRequestMatchers(AntPathRequestMatcher("/**")) // Disable CSRF for APIs
             }
             .authorizeHttpRequests {
+                it.requestMatchers("/auth/login").permitAll()  // Public
+                it.requestMatchers("/user/forgot-password").permitAll()  // Public endpoint
                 it.anyRequest().permitAll()  // Public endpoint
             }
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }  // No sessions

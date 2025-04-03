@@ -9,12 +9,31 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Query
 import java.time.ZonedDateTime
 
 interface OrderRepository : JpaRepository<Order, Long>, OrderRepositoryCustom {
     fun findAllByUserId(userId: String): List<Order>
     fun findOrderById(id: Long): Order
     override fun findAll(pageable: Pageable): Page<Order>
+
+    @Query("""
+        SELECT o FROM Order o 
+        WHERE o.type = 'LOJA'
+        AND o.user = :userId
+    """)
+    fun findAllLojaOrdersByUser(
+        userId: Long
+    ): List<Order>
+
+    @Query("""
+        SELECT o FROM Order o 
+        WHERE o.type = 'SUBSCRICAO'
+        AND o.user = :userId
+    """)
+    fun findAllSubscriptionsByUser(
+        userId: Long
+    ): List<Order>
 }
 
 interface OrderRepositoryCustom {

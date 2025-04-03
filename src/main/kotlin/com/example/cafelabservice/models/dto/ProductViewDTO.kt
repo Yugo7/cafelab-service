@@ -14,7 +14,7 @@ data class ProductViewDTO(
     val descricaoPt: String,
     val origem: String,
     val grao: String,
-    val preco: Double,
+    val preco: String,
     val imagem: String?,
     val secao: String,
     @JsonProperty("descricao_en")

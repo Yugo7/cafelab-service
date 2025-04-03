@@ -21,7 +21,7 @@ class MailConfig {
         props["mail.transport.protocol"] = "smtp"
         props["mail.smtp.auth"] = "true"
         props["mail.smtp.starttls.enable"] = "true"
-        props["mail.debug"] = "true"
+        //props["mail.debug"] = "true"
 
         return mailSender
     }

@@ -18,7 +18,8 @@ class WebhooksController(
     @PostMapping
     fun getWebhooks(@RequestBody payload: String, @RequestHeader("Stripe-Signature") sigHeader: String): ResponseEntity<String> {
         try {
-            webhookService.handleWebhook(ApiResource.GSON.fromJson(payload, Event::class.java))
+            //webhookService.handleWebhook(ApiResource.GSON.fromJson(payload, Event::class.java))
+            webhookService.process(ApiResource.GSON.fromJson(payload, Event::class.java))
         } catch (e: JsonSyntaxException) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.localizedMessage)
         }

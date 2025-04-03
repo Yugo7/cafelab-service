@@ -1,10 +1,14 @@
 package com.example.cafelabservice.service
 
 import com.example.cafelabservice.entity.Order
+import com.example.cafelabservice.entity.User
 import com.example.cafelabservice.models.enums.OrderType
 import com.stripe.Stripe
+import com.stripe.model.Customer
 import com.stripe.model.Invoice
 import com.stripe.model.checkout.Session
+import com.stripe.param.CustomerCreateParams
+import com.stripe.param.CustomerUpdateParams
 import com.stripe.param.checkout.SessionCreateParams
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
@@ -18,10 +22,15 @@ class StripeService {
     @Value("\${frontend.url}")
     private lateinit var frontendUrl: String
 
-    fun createCheckoutSession(productDetails: List<SessionCreateParams.LineItem>, order: Order) : Session {
+    fun createCheckoutSession(
+        productDetails: List<SessionCreateParams.LineItem>,
+        order: Order,
+        user: User?
+    ): Session {
         Stripe.apiKey = stripeApiKey
 
-        var sessionParams = SessionCreateParams.builder()
+        // Base session parameters
+        val sessionParamsBuilder = SessionCreateParams.builder()
             .setAllowPromotionCodes(true)
             .addAllCustomField(
                 listOf(
@@ -41,29 +50,21 @@ class StripeService {
             .setSuccessUrl("$frontendUrl/success")
             .setCancelUrl("$frontendUrl/cancel")
             .addAllLineItem(productDetails)
-            .setMode(SessionCreateParams.Mode.SUBSCRIPTION)
             .setBillingAddressCollection(SessionCreateParams.BillingAddressCollection.REQUIRED)
             .setShippingAddressCollection(
                 SessionCreateParams.ShippingAddressCollection.builder()
                     .addAllowedCountry(SessionCreateParams.ShippingAddressCollection.AllowedCountry.PT)
                     .build()
             )
-            .putMetadata("order_id", "1")
+            .putMetadata("order_id", order.id.toString())
             .setLocale(SessionCreateParams.Locale.PT)
-            .build()
 
-        if (order.type != OrderType.SUBSCRICAO) {
-            val newSessionParamsBuilder = SessionCreateParams.builder()
-                .setAllowPromotionCodes(sessionParams.allowPromotionCodes)
-                .addAllCustomField(sessionParams.customFields)
-                .setSuccessUrl(sessionParams.successUrl)
-                .setCancelUrl(sessionParams.cancelUrl)
-                .addAllLineItem(sessionParams.lineItems)
+        // Determine session mode
+        if (order.type == OrderType.SUBSCRICAO) {
+            sessionParamsBuilder.setMode(SessionCreateParams.Mode.SUBSCRIPTION)
+        } else {
+            sessionParamsBuilder
                 .setMode(SessionCreateParams.Mode.PAYMENT)
-                .setBillingAddressCollection(sessionParams.billingAddressCollection)
-                .setShippingAddressCollection(sessionParams.shippingAddressCollection)
-                .putMetadata("order_id", "1")
-                .setLocale(sessionParams.locale)
                 .addAllShippingOption(
                     listOf(
                         SessionCreateParams.ShippingOption.builder()
@@ -103,17 +104,46 @@ class StripeService {
                         .setEnabled(true)
                         .build()
                 )
-
-            sessionParams = newSessionParamsBuilder.build()
         }
 
-        val session = Session.create(sessionParams)
+        // If user has a Stripe Customer ID, attach it
+        user?.stripeId?.let { stripeId ->
+              sessionParamsBuilder.setCustomer(stripeId)
+//            sessionParamsBuilder.setCustomer("cus_RqDvqjOHXiLAj6")
+        }
 
-        return session
+        val sessionParams = sessionParamsBuilder.build()
+        return Session.create(sessionParams)
+    }
+
+    fun createStripeCustomer(user: User): Customer {
+        Stripe.apiKey = stripeApiKey
+
+        val params = CustomerCreateParams.builder()
+            .setEmail(user.email)
+            .setName(user.name ?: user.username)
+            .build()
+
+        return Customer.create(params)
     }
 
     fun getInvoice(id: String): Invoice {
         Stripe.apiKey = stripeApiKey
         return Invoice.retrieve(id)
+    }
+
+    fun addBalanceToCustomer(customerId: String, amount: Long): Customer {
+        Stripe.apiKey = stripeApiKey
+        val params = CustomerUpdateParams.builder()
+            .setBalance(amount)
+            .build()
+
+        return Customer.retrieve(customerId).update(params)
+    }
+
+    fun getCustomerBalance(customerId: String): Long {
+        Stripe.apiKey = stripeApiKey
+        val customer = Customer.retrieve(customerId)
+        return customer.balance
     }
 }

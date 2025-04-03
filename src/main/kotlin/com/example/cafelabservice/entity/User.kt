@@ -2,6 +2,7 @@ package com.example.cafelabservice.entity
 
 import com.example.cafelabservice.converter.JsonbListConverter
 import jakarta.persistence.*
+import org.hibernate.annotations.ColumnTransformer
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -15,15 +16,15 @@ data class User(
     val email: String,
     val birthday: LocalDate? = null,
     @Column(columnDefinition = "jsonb")
+    @ColumnTransformer(write = "?::jsonb")
     val address: String? = null,
     val nif: String? = null,
     val username: String? = null,
     val password: String,
     @Convert(converter = JsonbListConverter::class)
     @Column(columnDefinition = "jsonb")
+    @ColumnTransformer(write = "?::jsonb")
     val role: List<String>? = null,
     val stripeId: String? = null,
-    @Column(columnDefinition = "jsonb")
-    val guestStripeIds: String? = null,
     val isGuest: Boolean = false
 )

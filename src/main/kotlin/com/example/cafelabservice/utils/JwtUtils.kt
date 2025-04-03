@@ -53,12 +53,23 @@ object JwtUtil {
             .compact()
     }
 
+    fun extractUserDetails(token: String): Map<String, Any?> {
+        val claims = Jwts.parserBuilder()
+            .setSigningKey(getSignKey())
+            .build()
+            .parseClaimsJws(token)
+            .body
+
+        return mapOf(
+            "username" to claims.subject,
+            "roles" to claims["roles"]
+        )
+    }
 
     private fun getSignKey(): Key {
         val keyBytes = Decoders.BASE64.decode(secretKey)
         return Keys.hmacShaKeyFor(keyBytes)
     }
-
 
     fun extractUsername(token: String): String? {
         return extractClaim(token, Claims::getSubject)
