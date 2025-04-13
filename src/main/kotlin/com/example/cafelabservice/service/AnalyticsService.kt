@@ -40,13 +40,13 @@ class AnalyticsService(
         }
     }
 
-    @Scheduled(cron = "0 0 1 * * *")
+    @Scheduled(cron = "1 0 1 * * 1")
     fun fetchAnalyticsDataBean() {
         try {
             vercelService.getTimeSeriesData(
                 "event_data",
-                LocalDate.parse("2025-02-20").format(DateTimeFormatter.ISO_DATE) + "T00%3A00%3A00.000Z",
-                LocalDate.parse("2025-03-18").format(DateTimeFormatter.ISO_DATE) + "T00%3A00%3A00.000Z",
+                LocalDate.parse("2025-03-13").format(DateTimeFormatter.ISO_DATE) + "T00%3A00%3A00.000Z",
+                LocalDate.parse("2025-04-12").format(DateTimeFormatter.ISO_DATE) + "T00%3A00%3A00.000Z",
             )?.let { jsonResponse ->
                 logger.info("Fetching analytics data: " + jsonResponse.count())
                 val data = objectMapper.readValue(jsonResponse, ResponseWithObjects::class.java)

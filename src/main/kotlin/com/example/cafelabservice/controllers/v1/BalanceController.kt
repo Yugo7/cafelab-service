@@ -32,8 +32,13 @@ class BalanceController(private val balanceService: BalanceService) {
     }
 
     @GetMapping("/timeseries")
-    fun getBalancesByTimeSeries(@RequestParam startDate: LocalDate?  = LocalDate.parse("2024-01-01"), @RequestParam endDate: LocalDate? = LocalDate.now()): BalanceDetailsDTO? {
-        return balanceService.getBalancesByTimeSeries(startDate!!, endDate!!).ifEmpty { return null }.toDtoList()
+    fun getBalancesByTimeSeries(
+        @RequestParam startDate: String? = "2024-01-01",
+        @RequestParam endDate: String?
+    ): BalanceDetailsDTO? {
+        val endLocalDate = endDate?.let { LocalDate.parse(it) } ?: LocalDate.now()
+        return balanceService.getBalancesByTimeSeries(LocalDate.parse(startDate!!), endLocalDate)
+            .ifEmpty { return null }.toDtoList()
     }
 
     @PostMapping

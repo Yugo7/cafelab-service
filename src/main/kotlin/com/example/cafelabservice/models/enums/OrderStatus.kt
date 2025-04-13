@@ -12,5 +12,7 @@ enum class OrderStatus(val nome: String) {
 
     companion object {
         val validStatuses = listOf(ACTIVE, PAYMENT_SUCCESSFUL, DELIVERED, SUSPENDED, CANCELLED, IN_PROGRESS)
+
+        
     }
 }

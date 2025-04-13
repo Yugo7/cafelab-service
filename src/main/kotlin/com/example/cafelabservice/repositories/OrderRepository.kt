@@ -17,20 +17,24 @@ interface OrderRepository : JpaRepository<Order, Long>, OrderRepositoryCustom {
     fun findOrderById(id: Long): Order
     override fun findAll(pageable: Pageable): Page<Order>
 
-    @Query("""
+    @Query(
+        """
         SELECT o FROM Order o 
         WHERE o.type = 'LOJA'
-        AND o.user = :userId
-    """)
+        AND o.user = :userId AND o.isTest = FALSE 
+    """
+    )
     fun findAllLojaOrdersByUser(
         userId: Long
     ): List<Order>
 
-    @Query("""
+    @Query(
+        """
         SELECT o FROM Order o 
         WHERE o.type = 'SUBSCRICAO'
-        AND o.user = :userId
-    """)
+        AND o.user = :userId AND o.isTest = FALSE 
+    """
+    )
     fun findAllSubscriptionsByUser(
         userId: Long
     ): List<Order>
@@ -52,7 +56,7 @@ class OrderRepositoryCustomImpl(
 
     override fun countOrdersByType(): Map<OrderType, Long> {
         val query = entityManager.createQuery(
-            "SELECT o.type, COUNT(o) FROM Order o WHERE o.status IN :validStatuses GROUP BY o.type",
+            "SELECT o.type, COUNT(o) FROM Order o WHERE o.status IN :validStatuses  AND o.isTest = FALSE  GROUP BY o.type",
             Array<Any>::class.java
         )
         query.setParameter("validStatuses", OrderStatus.validStatuses)
@@ -62,7 +66,7 @@ class OrderRepositoryCustomImpl(
 
     override fun countOrdersByStatus(): Map<OrderStatus, Long> {
         val query = entityManager.createQuery(
-            "SELECT o.status, COUNT(o) FROM Order o WHERE o.status IN :validStatuses GROUP BY o.status",
+            "SELECT o.status, COUNT(o) FROM Order o WHERE o.status IN :validStatuses  AND o.isTest = FALSE  GROUP BY o.status",
             Array<Any>::class.java
         )
         query.setParameter("validStatuses", OrderStatus.validStatuses)
@@ -74,7 +78,7 @@ class OrderRepositoryCustomImpl(
         val startDate = ZonedDateTime.now().minusMonths(numberMonths.toLong()).withDayOfMonth(1)
         val query = entityManager.createQuery(
             "SELECT TO_CHAR(o.createdAt, 'YYYY/MM') as monthYear, COUNT(o) " +
-                    "FROM Order o WHERE o.createdAt >= :startDate AND o.status IN :validStatuses " +
+                    "FROM Order o WHERE o.createdAt >= :startDate AND o.status IN :validStatuses  AND o.isTest = FALSE " +
                     "GROUP BY monthYear " +
                     "ORDER BY TO_CHAR(o.createdAt, 'YYYY/MM')",
             Array<Any>::class.java
@@ -87,7 +91,7 @@ class OrderRepositoryCustomImpl(
 
     override fun findAllActiveOrders(pageable: Pageable): Page<Order> {
         val query = entityManager.createQuery(
-            "SELECT o FROM Order o WHERE o.status IN :validStatuses",
+            "SELECT o FROM Order o WHERE o.status IN :validStatuses AND o.isTest = FALSE ",
             Order::class.java
         )
         query.setParameter("validStatuses", OrderStatus.validStatuses)
@@ -96,7 +100,7 @@ class OrderRepositoryCustomImpl(
 
         val orders = query.resultList
         val countQuery = entityManager.createQuery(
-            "SELECT COUNT(o) FROM Order o WHERE o.status IN :validStatuses",
+            "SELECT COUNT(o) FROM Order o WHERE o.status IN :validStatuses AND o.isTest = FALSE ",
             Long::class.javaObjectType
         )
         countQuery.setParameter("validStatuses", OrderStatus.validStatuses)
