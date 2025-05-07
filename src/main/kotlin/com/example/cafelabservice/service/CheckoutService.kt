@@ -35,8 +35,7 @@ class CheckoutService(
 
         val productDetails = toCreate.orderProducts.map { (product, quantity) ->
             SessionCreateParams.LineItem.builder()
-                //.setPrice(product.priceId)
-                .setPrice("price_1QodX7RqqMn2mwDSf7dfh0Ig")
+                .setPrice(product.priceId)
                 .setQuantity(quantity.toLong())
                 .build()
         }
@@ -67,8 +66,7 @@ class CheckoutService(
         val user = subscriptionRequestDTO.user?.email?.let { userService.getUserByUsername(it) }
 
         val productDetails = SessionCreateParams.LineItem.builder()
-            //.setPrice(subscription.priceId)
-            .setPrice("price_1QodX7RqqMn2mwDSf7dfh0Ig")
+            .setPrice(subscription.priceId)
             .setQuantity(1L)
             .build()
 
